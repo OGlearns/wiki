@@ -14,8 +14,6 @@ class SearchForm(forms.Form):
     search = forms.CharField(max_length=100)
 
 class EditPageForm(forms.Form):
-    # new_title = forms.CharField(label="Title:",max_length=100)
-    # new_content = forms.CharField(widget=forms.Textarea(attrs={'name':'content','style':'height:40vh;width:70%;'}))
     old_title = forms.CharField(label="Title:",max_length=100)
     content = forms.CharField(widget=forms.Textarea(attrs={'name':'content','style':'height:40vh;width:70%;'}))
 
@@ -43,6 +41,7 @@ def entry_page(request, title):
             "content": markdowner.convert(entry),
             "form" : SearchForm()
         })
+    # IF ERROR, RETURN ERROR VIA FALSE CONTENT
     except TypeError:
         return render(request, "encyclopedia/entry.html", {
             "title": title,
@@ -64,6 +63,7 @@ def search_results(request):
 
         # check that the form is valid
         if search.is_valid():
+            # IF VALID GATHER GET SEARCH DATA
             search = search.cleaned_data['search']
             search = str(search).casefold()
             
@@ -89,7 +89,7 @@ def search_results(request):
             # RENDER ERROR IF SEARCH DOESN'T MATCH ANY CURRENT ENTRIES
             return render(request, "encyclopedia/search_results.html", {
                 "match" : match,
-                "no_match" : "This search does not match or resemble any current entries.",
+                # "no_match" : "This search does not match or resemble any current entries.",
                 "form" : SearchForm(),
                 "entries": entries,
                 "results" : results
@@ -103,7 +103,7 @@ def search_results(request):
                             "Error" : "Please enter a valid search",
                             "form" : SearchForm()
                         }) 
-    # RETURN INDEX IF GET REQUEST
+    # RETURN INDEX IF POST REQUEST
     else:
         form = SearchForm()
         return index(request)
@@ -112,15 +112,16 @@ def search_results(request):
 def new_page(request):
 
     title_taken = False
+    # HANDLE POST REQUEST
     if request.method == "POST":
 
         entries = util.list_entries()
         add_page = NewPageForm(request.POST)
-
+        # CONFIRM THE FORM SUBMISSION IS VALID
         if add_page.is_valid():
             new_title = str(add_page.cleaned_data['title'])
             new_content = add_page.cleaned_data['content']
-
+            # CHECK THAT THE ENTRY TITLE ISN'T ALREADY TAKEN. IF TAKEN, RENDER TAKEN ERROR
             for entry in entries:
                 if entry.casefold() == new_title.casefold():
                     title_taken = True
@@ -130,7 +131,7 @@ def new_page(request):
                         'form' : SearchForm()
                     })
             
-            # make the entry into a new page
+            # SAVE THE NEW ENTRY
             util.save_entry(new_title, new_content)
             return entry_page(request, new_title)
 
@@ -141,6 +142,8 @@ def new_page(request):
             'new_page_form' : NewPageForm(),
             'form' : SearchForm()
             })
+
+    # HANDLE GET REQUEST
     else:
         return render(request, "encyclopedia/new_page.html", {
             "new_page_form" : NewPageForm(),
@@ -158,7 +161,10 @@ def edit_page(request, title):
             "edit_page_form" : EditPageForm(),
             "entries" : util.list_entries()
         })
+    
+    # GIVEN ENTRY DOES EXIST
     entry = util.get_entry(title)
+    # HANDLE POST REQUEST
     if request.method == "POST":
 
     
@@ -184,8 +190,11 @@ def edit_page(request, title):
         })
 
 def random(request):
+    # GATHER ALL ENTRIES
     entries = util.list_entries()
+    # SELECT RANDOM ENTRY 
     random_entry = secrets.choice(entries)
+    # RETURN RANDOM ENTRY
     if request.method == "POST":
         return entry_page(request, random_entry)
     else:
