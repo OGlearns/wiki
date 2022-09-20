@@ -1,0 +1,25 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+
+    {{title}}
+
+{% endblock %}
+
+{% block body %}
+    {% if content %}
+            {{ content | safe }}
+            <div>
+                <form action="{% url 'encyclopedia:edit_page' title %}">
+                    <button type="submit">Edit Page</button>
+                </form>
+            </div>
+    {% else %}
+        <h3>
+            Error. The requested page was not found.
+            title = {{ title }}
+            content = {{ content }}
+        </h3>
+    {% endif %}
+            
+{% endblock %}

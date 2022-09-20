@@ -1,0 +1,45 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Encyclopedia
+{% endblock %}
+
+{% block body %}
+    <h1>Page Editor</h1>
+
+
+    {% if error %}
+        Error. This entry does not exist. Select an existing entry to edit.
+    {% elif not error %}
+
+
+        <div>
+            <!-- <label for="title">Enter Title:</label> -->
+            <!-- <input type="Text" placeholder="Title" name="title"> -->
+            <br>
+            <!-- <label for="content">Enter Content:</label> -->
+                <div>
+                    <!-- <textarea rows="5" cols="10" name="content"> -->
+                    <form method="post" >
+                        {% csrf_token %}
+                        {{ edit_page_form.as_p }}
+                        <button type="submit">Save</button>
+                    </form>
+
+                </div>
+                <br>
+        </div>
+
+
+    {% endif %}
+
+    <!-- <ul>
+        {% for entry in entries %}
+            <li> 
+                <a href="{% url 'encyclopedia:title' title=entry %}"> {{ entry }} </a>
+            </li>
+        {% endfor %}
+    </ul> -->
+
+
+{% endblock %}
